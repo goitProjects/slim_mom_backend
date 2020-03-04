@@ -1,0 +1,13 @@
+.basic_p {
+  font-size: 30px;
+}
+.basic_span {
+  font-size: 14px;
+  font-style: bold;
+}
+.basic_span::before {
+  content: "(";
+}
+.basic_span::after {
+  content: ")";
+}

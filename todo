@@ -1,0 +1,10 @@
+products in db
+[options.upsert=false] «Boolean» if true, and no documents found, insert a new document
+create or update
+
+
+
+мало ошибок в "проблемах"! мне больше нравиться когда строгая типизация и бьют по рукам. аирбнб и все такое больше нравится!
+
+
+проверка токена на валид и его существование в токене юзера из бд!

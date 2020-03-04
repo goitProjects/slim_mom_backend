@@ -1,0 +1,622 @@
+{
+	"openapi": "3.0.0",
+	"info": {
+		"version": "1.0.0",
+		"title": "API",
+		"description": "A minimal and easy API",
+		"license": {
+			"name": "MIT",
+			"url": "https://opensource.org/licenses/MIT"
+		}
+	},
+	"basePath": "/api/v1",
+	"schemes": ["https", "http"],
+	"servers": [
+		{
+			"url": "https://slim-moms.goit.co.ua/api/v1",
+			"description": "The production API server"
+		},
+		{
+			"url": "http://localhost:8081/api/v1",
+			"description": "The production API server"
+		}
+	],
+	"tags": [
+		{
+			"name": "Public",
+			"description": "NoProtected routes"
+		},
+		{
+			"name": "Protected",
+			"description": "Protected routes"
+		}
+	],
+	"consumes": ["application/json"],
+	"produces": ["application/json"],
+	"securityDefinitions": {},
+	"paths": {
+		"/register": {
+			"post": {
+				"tags": ["Public"],
+				"summary": "route for register",
+				"requestBody": {
+					"description": "Optional description in *Markdown*",
+					"required": ["nickname", "password"],
+					"content": {
+						"application/json": {
+							"schema": {
+								"oneOf": [
+									{ "$ref": "#/components/schemas/RegistrationRequest" },
+									{ "$ref": "#/components/schemas/SimpleRegister" }
+								],
+								"example": { "nickname": "blabla", "password": "password" }
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RegistrationResponse & LoginResponse"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "BAD",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string",
+											"example": "error"
+										},
+										"message": {
+											"type": "string",
+											"example": "Invalid Password"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/login": {
+			"post": {
+				"tags": ["Public"],
+				"summary": "route for login",
+				"requestBody": {
+					"description": "Optional description in *Markdown*",
+					"required": ["nickname", "password"],
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/LoginRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RegistrationResponse & LoginResponse"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "BAD",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"err": {
+											"type": "string",
+											"example": "Password is invalid"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/products": {
+			"get": {
+				"tags": ["Protected"],
+				"summary": "Get products for select",
+				"security": ["bearerAuth"],
+				"parameters": [
+					{
+						"name": "Authorization",
+						"in": "header",
+						"description": "JWT",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/securitySchemes/bearerAuth"
+						},
+						"style": "simple"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object"
+								}
+							}
+						}
+					},
+					"401": {
+						"$ref": "#/components/responses/UnauthorizedError"
+					}
+				}
+			}
+		},
+		"/user": {
+			"get": {
+				"tags": ["Protected"],
+				"summary": "Get User data and check Token validation",
+				"security": ["bearerAuth"],
+				"parameters": [
+					{
+						"name": "Authorization",
+						"in": "header",
+						"description": "JWT",
+						"required": true,
+						"style": "simple",
+						"schema": {
+							"$ref": "#/components/securitySchemes/bearerAuth"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RegistrationResponse & LoginResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"$ref": "#/components/responses/UnauthorizedError"
+					}
+				}
+			},
+			"put": {
+				"tags": ["Protected"],
+				"summary": "Save new user data 'CALC' (weight, height, groupBlood, ...)",
+				"security": ["bearerAuth"],
+				"parameters": [
+					{
+						"name": "Authorization",
+						"in": "header",
+						"description": "JWT",
+						"required": true,
+						"style": "simple",
+						"schema": {
+							"$ref": "#/components/securitySchemes/bearerAuth"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateUserDataRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UpdateUserDataRespond"
+								}
+							}
+						}
+					},
+					"401": {
+						"$ref": "#/components/responses/UnauthorizedError"
+					}
+				}
+			}
+		},
+		"/user/eats/{date}": {
+			"get": {
+				"tags": ["Protected"],
+				"summary": "Return list eated products by date in milliseconds",
+				"security": ["bearerAuth"],
+				"parameters": [
+					{
+						"name": "Authorization",
+						"in": "header",
+						"description": "JWT",
+						"required": true,
+						"style": "simple",
+						"schema": {
+							"$ref": "#/components/securitySchemes/bearerAuth"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object"
+								}
+							}
+						}
+					},
+					"401": {
+						"$ref": "#/components/responses/UnauthorizedError"
+					}
+				}
+			}
+		},
+		"/user/eats/{productId}": {
+			"post": {
+				"tags": ["Protected"],
+				"summary": "Create new record what user eat",
+				"security": ["bearerAuth"],
+				"parameters": [
+					{
+						"name": "Authorization",
+						"in": "header",
+						"description": "JWT",
+						"required": true,
+						"style": "simple",
+						"schema": {
+							"$ref": "#/components/securitySchemes/bearerAuth"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object"
+								}
+							}
+						}
+					},
+					"401": {
+						"$ref": "#/components/responses/UnauthorizedError"
+					}
+				}
+			},
+			"delete": {
+				"tags": ["Protected"],
+				"summary": "Delete record user eat",
+				"security": ["bearerAuth"],
+				"parameters": [
+					{
+						"name": "Authorization",
+						"in": "header",
+						"description": "JWT",
+						"required": true,
+						"style": "simple",
+						"schema": {
+							"$ref": "#/components/securitySchemes/bearerAuth"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object"
+								}
+							}
+						}
+					},
+					"401": {
+						"$ref": "#/components/responses/UnauthorizedError"
+					}
+				}
+			}
+		},
+		"/logout": {
+			"post": {
+				"tags": ["Protected"],
+				"summary": "Logout user from system ",
+				"security": ["bearerAuth"],
+				"parameters": [
+					{
+						"name": "Authorization",
+						"in": "header",
+						"description": "JWT",
+						"required": true,
+						"style": "simple",
+						"schema": {
+							"$ref": "#/components/securitySchemes/bearerAuth"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string",
+											"example": "success"
+										},
+										"message": {
+											"type": "string",
+											"example": "User nickname exit"
+										}
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"$ref": "#/components/responses/UnauthorizedError"
+					}
+				}
+			}
+		}
+	},
+	"components": {
+		"securitySchemes": {
+			"api_key": {
+				"type": "scheme",
+				"scheme": "bearer",
+				"bearerFormat": "JWT"
+			},
+			"bearerAuth": {
+				"type": "http",
+				"scheme": "bearer",
+				"bearerFormat": "JWT"
+			}
+		},
+		"schemas": {
+			"UpdateUserDataRespond": {
+				"type": "object",
+				"properties": {
+					"status": {
+						"type": "string",
+						"default": "success",
+						"example": "success"
+					},
+					"userData": {
+						"$ref": "#/components/schemas/UpdateUserDataRequest"
+					}
+				}
+			},
+			"UpdateUserDataRequest": {
+				"type": "object",
+				"properties": {
+					"age": {
+						"type": "number",
+						"minimum": 1,
+						"maximum": 99,
+						"maxLength": 2
+					},
+					"desiredWeight": {
+						"type": "number",
+						"minimum": 1,
+						"maximum": 199,
+						"maxLength": 3
+					},
+					"height": {
+						"type": "number",
+						"minimum": 1,
+						"maximum": 230
+					},
+					"currentWeight": {
+						"type": "number",
+						"minimum": 1,
+						"maximum": 199,
+						"maxLength": 3
+					},
+					"groupBlood": {
+						"type": "number",
+						"enum": [1, 2, 3, 4]
+					},
+					"dailyRate": {
+						"type": "number"
+					}
+				}
+			},
+			"RegistrationRequest": {
+				"type": "object",
+				"properties": {
+					"nickname": {
+						"type": "string",
+						"maxLength": 15,
+						"minLength": 5,
+						"required": true,
+						"example": "Pasha"
+					},
+					"password": {
+						"type": "string",
+						"maxLength": 12,
+						"minLength": 5,
+						"required": true,
+						"example": "Awesome_01"
+					},
+					"userData": {
+						"type": "object",
+						"properties": {
+							"email": {
+								"type": "string",
+								"lowercase": true,
+								"trim": true,
+								"example": "email@gmail.com",
+								"unique": true
+							},
+							"age": {
+								"type:": "number",
+								"min": 1,
+								"max": 99,
+								"maxlength": 2,
+								"example": 25
+							},
+							"desiredWeight": {
+								"type": "number",
+								"min": 1,
+								"max": 199,
+								"maxlength": 3,
+								"example": 60
+							},
+							"height": {
+								"type": "number",
+								"min": 1,
+								"max": 230,
+								"example": 175
+							},
+							"currentWeight": {
+								"type": "number",
+								"min": 1,
+								"max": 199,
+								"maxlength": 3,
+								"example": 80
+							},
+							"groupBlood": {
+								"type": "Number",
+								"enum": [1, 2, 3, 4],
+								"example": 1
+							}
+						}
+					}
+				},
+				"required": ["nickname", "password"]
+			},
+			"SimpleRegister": {
+				"type": "object",
+				"properties": {
+					"nickname": {
+						"type": "string",
+						"maxLength": 15,
+						"minLength": 5,
+						"required": true,
+						"example": "Pasha"
+					},
+					"password": {
+						"type": "string",
+						"maxLength": 12,
+						"minLength": 5,
+						"required": true,
+						"example": "Awesome_01"
+					}
+				},
+				"required": ["nickname", "password"]
+			},
+			"LoginRequest": {
+				"type": "object",
+				"properties": {
+					"nickname": {
+						"type": "string",
+						"maxLength": 15,
+						"minLength": 5,
+						"required": true,
+						"example": "Pasha"
+					},
+					"password": {
+						"type": "string",
+						"maxLength": 12,
+						"minLength": 5,
+						"required": true,
+						"example": "Awesome_01"
+					}
+				},
+				"required": ["nickname", "password"]
+			},
+			"RegistrationResponse & LoginResponse": {
+				"type": "object",
+				"properties": {
+					"status": {
+						"type": "string",
+						"example": "success"
+					},
+					"user": {
+						"type": "object",
+						"properties": {
+							"nickname": {
+								"type": "string",
+								"example": "Pasha"
+							},
+							"token": {
+								"type": "string",
+								"example": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1ZDNhMTM4NmIxZTg1NTdjZjIzNjY3ODEiLCJpYXQiOjE1NjQwODcxNzV9.jSdzHuBSf4yKS6t7zwt0AoQIchHlz73JDOjfHVdbTBk"
+							},
+							"userData": {
+								"type": "object",
+								"properties": {
+									"age": {
+										"type:": "number",
+										"min": 1,
+										"max": 99,
+										"maxLength": 2,
+										"example": 25
+									},
+									"desiredWeight": {
+										"type": "number",
+										"min": 1,
+										"max": 199,
+										"maxLength": 3,
+										"example": 60
+									},
+									"height": {
+										"type": "number",
+										"min": 1,
+										"max": 230,
+										"example": 175
+									},
+									"currentWeight": {
+										"type": "number",
+										"min": 1,
+										"max": 199,
+										"maxLength": 3,
+										"example": 80
+									},
+									"groupBlood": {
+										"type": "Number",
+										"enum": [1, 2, 3, 4],
+										"example": 1
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"responses": {
+			"UnauthorizedError": {
+				"description": "Access token is missing or invalid"
+			}
+		}
+	}
+}
