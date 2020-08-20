@@ -54,7 +54,7 @@
 		"prettier": "^1.18.2"
 	},
 	"dependencies": {
-		"bcrypt": "^3.0.6",
+		"bcrypt": "^5.0.0",
 		"convert-excel-to-json": "1.6.1",
 		"cors": "^2.8.5",
 		"dotenv": "^8.0.0",
